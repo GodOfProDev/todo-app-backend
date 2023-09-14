@@ -62,7 +62,7 @@ func getTask(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusForbidden, "Invalid task id")
+		context.IndentedJSON(http.StatusBadRequest, "Invalid task id")
 		return
 	}
 
@@ -96,7 +96,50 @@ func addTask(context *gin.Context) {
 }
 
 func updateTask(context *gin.Context) {
+	var rTask task
+	idStr := context.Param("id")
 
+	id, err := strconv.Atoi(strings.TrimSpace(idStr))
+
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, "Invalid task id")
+		return
+	}
+
+	var newTask task
+
+	err = context.BindJSON(&newTask)
+	if err != nil {
+		return
+	}
+
+	if newTask.Status == "" {
+		context.IndentedJSON(http.StatusBadRequest, "Invalid task data")
+		return
+	}
+
+	for i := 0; i < len(tasks); i++ {
+		task := &tasks[i]
+
+		if task.Id != id {
+			continue
+		}
+
+		task.Title = newTask.Title
+		task.Description = newTask.Description
+		task.DueDate = newTask.DueDate
+		task.Status = newTask.Status
+		rTask = *task
+
+		println(task.Title)
+	}
+
+	if rTask.Status == "" {
+		context.IndentedJSON(http.StatusNotFound, "Task not found")
+		return
+	}
+
+	context.IndentedJSON(http.StatusOK, rTask)
 }
 
 func deleteTask(context *gin.Context) {
@@ -106,7 +149,7 @@ func deleteTask(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusForbidden, "Invalid task id")
+		context.IndentedJSON(http.StatusBadRequest, "Invalid task id")
 		return
 	}
 
