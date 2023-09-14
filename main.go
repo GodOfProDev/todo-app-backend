@@ -100,5 +100,37 @@ func updateTask(context *gin.Context) {
 }
 
 func deleteTask(context *gin.Context) {
+	var rTask task
+	idStr := context.Param("id")
 
+	id, err := strconv.Atoi(strings.TrimSpace(idStr))
+
+	if err != nil {
+		context.IndentedJSON(http.StatusForbidden, "Invalid task id")
+		return
+	}
+
+	indexToRemove := -1
+
+	for i, task := range tasks {
+		if task.Id != id {
+			continue
+		}
+
+		rTask = task
+		indexToRemove = i
+	}
+
+	if rTask.Status == "" {
+		context.IndentedJSON(http.StatusNotFound, "Task not found")
+		return
+	}
+
+	tasks = remove(tasks, indexToRemove)
+
+	context.IndentedJSON(http.StatusOK, tasks)
+}
+
+func remove(slice []task, s int) []task {
+	return append(slice[:s], slice[s+1:]...)
 }
