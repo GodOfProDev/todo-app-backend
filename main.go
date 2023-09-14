@@ -50,6 +50,7 @@ func main() {
 	router.GET("/tasks/:id", getTask)
 	router.POST("/tasks", addTask)
 	router.PUT("/tasks/:id", updateTask)
+	router.PATCH("/tasks/:id", patchTask)
 	router.DELETE("/tasks/:id", deleteTask)
 
 	router.Run("localhost:8080")
@@ -144,6 +145,10 @@ func updateTask(context *gin.Context) {
 	}
 
 	context.IndentedJSON(http.StatusOK, rTask)
+}
+
+func patchTask(context *gin.Context) {
+
 }
 
 func deleteTask(context *gin.Context) {
