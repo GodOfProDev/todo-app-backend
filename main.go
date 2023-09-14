@@ -15,6 +15,10 @@ type task struct {
 	Status      string `json:"status"`
 }
 
+func (t task) validate() bool {
+	return t.Title == "" || t.Description == "" || t.Status == ""
+}
+
 var tasks = []task{
 	{
 		Id:          0,
@@ -74,7 +78,7 @@ func getTask(context *gin.Context) {
 		rTask = task
 	}
 
-	if rTask.Status == "" {
+	if !rTask.validate() {
 		context.IndentedJSON(http.StatusNotFound, "Task not found")
 		return
 	}
@@ -113,7 +117,7 @@ func updateTask(context *gin.Context) {
 		return
 	}
 
-	if newTask.Status == "" {
+	if !newTask.validate() {
 		context.IndentedJSON(http.StatusBadRequest, "Invalid task data")
 		return
 	}
@@ -134,7 +138,7 @@ func updateTask(context *gin.Context) {
 		println(task.Title)
 	}
 
-	if rTask.Status == "" {
+	if !rTask.validate() {
 		context.IndentedJSON(http.StatusNotFound, "Task not found")
 		return
 	}
@@ -164,7 +168,7 @@ func deleteTask(context *gin.Context) {
 		indexToRemove = i
 	}
 
-	if rTask.Status == "" {
+	if !rTask.validate() {
 		context.IndentedJSON(http.StatusNotFound, "Task not found")
 		return
 	}
