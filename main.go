@@ -16,7 +16,23 @@ type task struct {
 }
 
 func (t task) validate() bool {
-	return t.Title == "" || t.Description == "" || t.Status == ""
+	return t.Title != "" && t.Description != "" && t.Status != ""
+}
+
+func (t task) validateTitle() bool {
+	return t.Title != ""
+}
+
+func (t task) validateDescription() bool {
+	return t.Description != ""
+}
+
+func (t task) validateStatus() bool {
+	return t.Status != ""
+}
+
+func (t task) validateDueDate() bool {
+	return t.DueDate != 0
 }
 
 var tasks = []task{
@@ -46,21 +62,21 @@ var tasks = []task{
 func main() {
 	router := gin.Default()
 
-	router.GET("/tasks", getTasks)
-	router.GET("/tasks/:id", getTask)
-	router.POST("/tasks", addTask)
-	router.PUT("/tasks/:id", updateTask)
-	router.PATCH("/tasks/:id", patchTask)
+	router.GET("/tasks", getTasksRoute)
+	router.GET("/tasks/:id", getTaskRoute)
+	router.POST("/tasks", addTaskRoute)
+	router.PUT("/tasks/:id", updateTaskRoute)
+	router.PATCH("/tasks/:id", patchTaskRoute)
 	router.DELETE("/tasks/:id", deleteTask)
 
 	router.Run("localhost:8080")
 }
 
-func getTasks(context *gin.Context) {
+func getTasksRoute(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, tasks)
 }
 
-func getTask(context *gin.Context) {
+func getTaskRoute(context *gin.Context) {
 	idStr := context.Param("id")
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
@@ -79,7 +95,7 @@ func getTask(context *gin.Context) {
 	context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
 }
 
-func addTask(context *gin.Context) {
+func addTaskRoute(context *gin.Context) {
 	var newTask task
 
 	err := context.BindJSON(&newTask)
@@ -92,7 +108,7 @@ func addTask(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, tasks)
 }
 
-func updateTask(context *gin.Context) {
+func updateTaskRoute(context *gin.Context) {
 	var rTask task
 	idStr := context.Param("id")
 
@@ -127,8 +143,6 @@ func updateTask(context *gin.Context) {
 		task.DueDate = newTask.DueDate
 		task.Status = newTask.Status
 		rTask = *task
-
-		println(task.Title)
 	}
 
 	if !rTask.validate() {
@@ -139,8 +153,47 @@ func updateTask(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, rTask)
 }
 
-func patchTask(context *gin.Context) {
+func patchTaskRoute(context *gin.Context) {
+	idStr := context.Param("id")
+	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
+		return
+	}
+
+	var input task
+
+	err = context.BindJSON(&input)
+	if err != nil {
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task data"})
+		return
+	}
+
+	for i := 0; i < len(tasks); i++ {
+		task := &tasks[i]
+
+		if task.Id == id {
+			updateTask(input, task)
+		}
+	}
+
+	context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
+}
+
+func updateTask(input task, task *task) {
+	if input.validateTitle() {
+		task.Title = input.Title
+	}
+	if input.validateDescription() {
+		task.Description = input.Description
+	}
+	if input.validateStatus() {
+		task.Status = input.Status
+	}
+	if input.validateDueDate() {
+		task.DueDate = input.DueDate
+	}
 }
 
 func deleteTask(context *gin.Context) {
