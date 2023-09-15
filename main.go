@@ -61,30 +61,22 @@ func getTasks(context *gin.Context) {
 }
 
 func getTask(context *gin.Context) {
-	var rTask task
 	idStr := context.Param("id")
-
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, "Invalid task id")
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
 		return
 	}
 
 	for _, task := range tasks {
-		if task.Id != id {
-			continue
+		if task.Id == id {
+			context.IndentedJSON(http.StatusOK, task)
+			return
 		}
-
-		rTask = task
 	}
 
-	if !rTask.validate() {
-		context.IndentedJSON(http.StatusNotFound, "Task not found")
-		return
-	}
-
-	context.IndentedJSON(http.StatusOK, rTask)
+	context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
 }
 
 func addTask(context *gin.Context) {
@@ -107,7 +99,7 @@ func updateTask(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, "Invalid task id")
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
 		return
 	}
 
@@ -119,7 +111,7 @@ func updateTask(context *gin.Context) {
 	}
 
 	if !newTask.validate() {
-		context.IndentedJSON(http.StatusBadRequest, "Invalid task data")
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task data"})
 		return
 	}
 
@@ -140,7 +132,7 @@ func updateTask(context *gin.Context) {
 	}
 
 	if !rTask.validate() {
-		context.IndentedJSON(http.StatusNotFound, "Task not found")
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
 		return
 	}
 
@@ -158,7 +150,7 @@ func deleteTask(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, "Invalid task id")
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
 		return
 	}
 
@@ -174,7 +166,7 @@ func deleteTask(context *gin.Context) {
 	}
 
 	if !rTask.validate() {
-		context.IndentedJSON(http.StatusNotFound, "Task not found")
+		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
 		return
 	}
 
