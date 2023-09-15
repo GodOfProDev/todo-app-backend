@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Check out repo code
     - uses: actions/checkout@v3
 
     - name: Set up Go
@@ -25,8 +24,8 @@ jobs:
 
     - name: Run linting
       run: |
-        go fmt ./...
-        go vet ./...
+       go fmt ./...
+       go vet ./...
 
     - name: Build
       run: go build -v ./...
