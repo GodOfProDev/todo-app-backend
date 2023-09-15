@@ -1,4 +1,4 @@
-module todo_app
+module github.com/godofprodev/todo_app_backend
 
 go 1.21
 
