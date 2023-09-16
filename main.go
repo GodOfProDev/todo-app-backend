@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var tasks = []task{
+var tasks = []Task{
 	{
 		Id:          0,
 		Title:       "Dishes",
@@ -57,7 +57,7 @@ func getTaskRoute(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
 		return
 	}
 
@@ -72,7 +72,7 @@ func getTaskRoute(context *gin.Context) {
 }
 
 func addTaskRoute(context *gin.Context) {
-	var newTask task
+	var newTask Task
 
 	err := context.BindJSON(&newTask)
 	if err != nil {
@@ -85,17 +85,17 @@ func addTaskRoute(context *gin.Context) {
 }
 
 func updateTaskRoute(context *gin.Context) {
-	var rTask task
+	var rTask Task
 	idStr := context.Param("id")
 
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
 		return
 	}
 
-	var newTask task
+	var newTask Task
 
 	err = context.BindJSON(&newTask)
 	if err != nil {
@@ -103,7 +103,7 @@ func updateTaskRoute(context *gin.Context) {
 	}
 
 	if !newTask.validate() {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task data"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task data"})
 		return
 	}
 
@@ -134,15 +134,15 @@ func patchTaskRoute(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
 		return
 	}
 
-	var input task
+	var input Task
 
 	err = context.BindJSON(&input)
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task data"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task data"})
 		return
 	}
 
@@ -160,13 +160,13 @@ func patchTaskRoute(context *gin.Context) {
 }
 
 func deleteTaskRoute(context *gin.Context) {
-	var rTask task
+	var rTask Task
 	idStr := context.Param("id")
 
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid task id"})
+		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
 		return
 	}
 
@@ -191,6 +191,6 @@ func deleteTaskRoute(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, tasks)
 }
 
-func remove(slice []task, s int) []task {
+func remove(slice []Task, s int) []Task {
 	return append(slice[:s], slice[s+1:]...)
 }
