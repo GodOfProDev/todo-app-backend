@@ -7,34 +7,6 @@ import (
 	"strings"
 )
 
-type task struct {
-	Id          int    `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	DueDate     int64  `json:"due_date"`
-	Status      string `json:"status"`
-}
-
-func (t task) validate() bool {
-	return t.Title != "" && t.Description != "" && t.Status != ""
-}
-
-func (t task) validateTitle() bool {
-	return t.Title != ""
-}
-
-func (t task) validateDescription() bool {
-	return t.Description != ""
-}
-
-func (t task) validateStatus() bool {
-	return t.Status != ""
-}
-
-func (t task) validateDueDate() bool {
-	return t.DueDate != 0
-}
-
 var tasks = []task{
 	{
 		Id:          0,
@@ -67,9 +39,13 @@ func main() {
 	router.POST("/tasks", addTaskRoute)
 	router.PUT("/tasks/:id", updateTaskRoute)
 	router.PATCH("/tasks/:id", patchTaskRoute)
-	router.DELETE("/tasks/:id", deleteTask)
+	router.DELETE("/tasks/:id", deleteTaskRoute)
 
-	router.Run("localhost:8080")
+	err := router.Run(":8080")
+
+	if err != nil {
+		panic(err)
+	}
 }
 
 func getTasksRoute(context *gin.Context) {
@@ -174,29 +150,16 @@ func patchTaskRoute(context *gin.Context) {
 		task := &tasks[i]
 
 		if task.Id == id {
-			updateTask(input, task)
+			task.updateTask(input)
+			context.IndentedJSON(http.StatusOK, task)
+			return
 		}
 	}
 
 	context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
 }
 
-func updateTask(input task, task *task) {
-	if input.validateTitle() {
-		task.Title = input.Title
-	}
-	if input.validateDescription() {
-		task.Description = input.Description
-	}
-	if input.validateStatus() {
-		task.Status = input.Status
-	}
-	if input.validateDueDate() {
-		task.DueDate = input.DueDate
-	}
-}
-
-func deleteTask(context *gin.Context) {
+func deleteTaskRoute(context *gin.Context) {
 	var rTask task
 	idStr := context.Param("id")
 
