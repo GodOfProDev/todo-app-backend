@@ -57,7 +57,7 @@ func getTaskRoute(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
+		sendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
@@ -68,7 +68,7 @@ func getTaskRoute(context *gin.Context) {
 		}
 	}
 
-	context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
+	sendError(context, http.StatusNotFound, "Task not found")
 }
 
 func addTaskRoute(context *gin.Context) {
@@ -91,7 +91,7 @@ func updateTaskRoute(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
+		sendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
@@ -103,26 +103,26 @@ func updateTaskRoute(context *gin.Context) {
 	}
 
 	if !newTask.validate() {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task data"})
+		sendError(context, http.StatusBadRequest, "Invalid Task data")
 		return
 	}
 
 	for i := 0; i < len(tasks); i++ {
 		task := &tasks[i]
 
-		if task.Id != id {
-			continue
-		}
+		if task.Id == id {
+			task.Title = newTask.Title
+			task.Description = newTask.Description
+			task.DueDate = newTask.DueDate
+			task.Status = newTask.Status
+			rTask = *task
 
-		task.Title = newTask.Title
-		task.Description = newTask.Description
-		task.DueDate = newTask.DueDate
-		task.Status = newTask.Status
-		rTask = *task
+			return
+		}
 	}
 
 	if !rTask.validate() {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
+		sendError(context, http.StatusNotFound, "Task not found")
 		return
 	}
 
@@ -134,7 +134,7 @@ func patchTaskRoute(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
+		sendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
@@ -142,7 +142,7 @@ func patchTaskRoute(context *gin.Context) {
 
 	err = context.BindJSON(&input)
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task data"})
+		sendError(context, http.StatusBadRequest, "Invalid Task data")
 		return
 	}
 
@@ -156,7 +156,7 @@ func patchTaskRoute(context *gin.Context) {
 		}
 	}
 
-	context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
+	sendError(context, http.StatusNotFound, "Task not found")
 }
 
 func deleteTaskRoute(context *gin.Context) {
@@ -166,23 +166,22 @@ func deleteTaskRoute(context *gin.Context) {
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		context.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid Task id"})
+		sendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
 	indexToRemove := -1
 
 	for i, task := range tasks {
-		if task.Id != id {
-			continue
+		if task.Id == id {
+			rTask = task
+			indexToRemove = i
+			return
 		}
-
-		rTask = task
-		indexToRemove = i
 	}
 
 	if !rTask.validate() {
-		context.IndentedJSON(http.StatusNotFound, gin.H{"message": "Task not found"})
+		sendError(context, http.StatusNotFound, "Task not found")
 		return
 	}
 
