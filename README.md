@@ -41,6 +41,17 @@ description: The description of the task.
 due_date: The due date of the task.
 status: The status of the task (e.g., "incomplete").
 ```
+* #### PATCH ``/tasks/:id``
+```
+Updates the associated task with optinial params
+
+Params:
+
+title: The title of the task. (optinal)
+description: The description of the task. (optinal)
+due_date: The due date of the task. (optinal)
+status: The status of the task (e.g., "incomplete"). (optinal)
+```
 * #### DELETE ``/tasks/:id``
 ```
 Deletes the associated task
