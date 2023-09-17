@@ -1,4 +1,4 @@
-package main
+package models
 
 type Task struct {
 	Id          int    `json:"id"`
@@ -8,7 +8,7 @@ type Task struct {
 	Status      string `json:"status"`
 }
 
-func (t Task) validate() bool {
+func (t Task) Validate() bool {
 	return t.Title != "" && t.Description != "" && t.Status != ""
 }
 
@@ -28,7 +28,7 @@ func (t Task) validateDueDate() bool {
 	return t.DueDate != 0
 }
 
-func (t *Task) updateTask(task Task) {
+func (t *Task) UpdateTask(task Task) {
 	if task.validateTitle() {
 		t.Title = task.Title
 	}
