@@ -1,8 +1,9 @@
-package main
+package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/godofprodev/todo-app-backend/models"
+	"github.com/godofprodev/todo-app-backend/internal/models"
+	"github.com/godofprodev/todo-app-backend/internal/utils"
 	"net/http"
 	"strconv"
 	"strings"
@@ -32,33 +33,16 @@ var tasks = []models.Task{
 	},
 }
 
-func main() {
-	router := gin.Default()
-
-	router.GET("/tasks", getTasksRoute)
-	router.GET("/tasks/:id", getTaskRoute)
-	router.POST("/tasks", addTaskRoute)
-	router.PUT("/tasks/:id", updateTaskRoute)
-	router.PATCH("/tasks/:id", patchTaskRoute)
-	router.DELETE("/tasks/:id", deleteTaskRoute)
-
-	err := router.Run(":8080")
-
-	if err != nil {
-		panic(err)
-	}
-}
-
-func getTasksRoute(context *gin.Context) {
+func getTasksHandler(context *gin.Context) {
 	context.IndentedJSON(http.StatusOK, tasks)
 }
 
-func getTaskRoute(context *gin.Context) {
+func getTaskHandler(context *gin.Context) {
 	idStr := context.Param("id")
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		sendError(context, http.StatusBadRequest, "Invalid Task id")
+		utils.SendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
@@ -69,10 +53,10 @@ func getTaskRoute(context *gin.Context) {
 		}
 	}
 
-	sendError(context, http.StatusNotFound, "Task not found")
+	utils.SendError(context, http.StatusNotFound, "Task not found")
 }
 
-func addTaskRoute(context *gin.Context) {
+func addTaskHandler(context *gin.Context) {
 	var newTask models.Task
 
 	err := context.BindJSON(&newTask)
@@ -85,14 +69,14 @@ func addTaskRoute(context *gin.Context) {
 	context.IndentedJSON(http.StatusCreated, tasks)
 }
 
-func updateTaskRoute(context *gin.Context) {
+func updateTaskHandler(context *gin.Context) {
 	var rTask models.Task
 	idStr := context.Param("id")
 
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		sendError(context, http.StatusBadRequest, "Invalid Task id")
+		utils.SendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
@@ -104,7 +88,7 @@ func updateTaskRoute(context *gin.Context) {
 	}
 
 	if !newTask.Validate() {
-		sendError(context, http.StatusBadRequest, "Invalid Task data")
+		utils.SendError(context, http.StatusBadRequest, "Invalid Task data")
 		return
 	}
 
@@ -123,19 +107,19 @@ func updateTaskRoute(context *gin.Context) {
 	}
 
 	if !rTask.Validate() {
-		sendError(context, http.StatusNotFound, "Task not found")
+		utils.SendError(context, http.StatusNotFound, "Task not found")
 		return
 	}
 
 	context.IndentedJSON(http.StatusOK, rTask)
 }
 
-func patchTaskRoute(context *gin.Context) {
+func patchTaskHandler(context *gin.Context) {
 	idStr := context.Param("id")
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		sendError(context, http.StatusBadRequest, "Invalid Task id")
+		utils.SendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
@@ -143,7 +127,7 @@ func patchTaskRoute(context *gin.Context) {
 
 	err = context.BindJSON(&input)
 	if err != nil {
-		sendError(context, http.StatusBadRequest, "Invalid Task data")
+		utils.SendError(context, http.StatusBadRequest, "Invalid Task data")
 		return
 	}
 
@@ -157,17 +141,17 @@ func patchTaskRoute(context *gin.Context) {
 		}
 	}
 
-	sendError(context, http.StatusNotFound, "Task not found")
+	utils.SendError(context, http.StatusNotFound, "Task not found")
 }
 
-func deleteTaskRoute(context *gin.Context) {
+func deleteTaskHandler(context *gin.Context) {
 	var rTask models.Task
 	idStr := context.Param("id")
 
 	id, err := strconv.Atoi(strings.TrimSpace(idStr))
 
 	if err != nil {
-		sendError(context, http.StatusBadRequest, "Invalid Task id")
+		utils.SendError(context, http.StatusBadRequest, "Invalid Task id")
 		return
 	}
 
@@ -182,15 +166,11 @@ func deleteTaskRoute(context *gin.Context) {
 	}
 
 	if !rTask.Validate() {
-		sendError(context, http.StatusNotFound, "Task not found")
+		utils.SendError(context, http.StatusNotFound, "Task not found")
 		return
 	}
 
-	tasks = remove(tasks, indexToRemove)
+	tasks = utils.Remove(tasks, indexToRemove)
 
 	context.IndentedJSON(http.StatusOK, tasks)
-}
-
-func remove(slice []models.Task, s int) []models.Task {
-	return append(slice[:s], slice[s+1:]...)
 }
