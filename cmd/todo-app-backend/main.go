@@ -5,9 +5,9 @@ import (
 )
 
 func main() {
-	router := router.NewRouter()
+	apiRouter := router.NewRouter()
 
-	err := router.Start()
+	err := apiRouter.Start()
 
 	if err != nil {
 		panic(err)
